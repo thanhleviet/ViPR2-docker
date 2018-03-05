@@ -3,7 +3,7 @@ This repo contains Dockerfile of the ViPR2 and a simple nextflow script.
 
 This is not a final production version yet.
 
-#ORIGINAL README
+# ORIGINAL README
 
 ViPR2: This is a remake of the original
 [ViPR pipeline](https://github.com/CSB5/vipr) developed within the
