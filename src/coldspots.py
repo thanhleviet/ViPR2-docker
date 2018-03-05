@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 """Determine mutational coldspots from pooled SNP files
 """
 

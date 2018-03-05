@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 source /mnt/software/etc/gis.bashrc
 #eval `/mnt/projects/rpd/init -d`
 #use -a mnt-software

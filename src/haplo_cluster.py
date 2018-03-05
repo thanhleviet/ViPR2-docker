@@ -1,9 +1,8 @@
-#!/usr/bin/env python2
-"""Cluster SNVs based on SNV freqs confidence interval
-
+#!/usr/bin/env python
+"""
+Cluster SNVs based on SNV freqs confidence interval
 Previously lofreq2_cluster.py and part of LoFreq
 """
-
 
 __author__ = "Andreas Wilm, Niranjan Nagarajan"
 __email__ = "wilma@gis.a-star.edu.sg"
@@ -49,7 +48,7 @@ CI = namedtuple('CI', ['min', 'max'])
 #                                     color_scheme='Linux', call_pdb=1)
 
 def compute_ci(coverage, var_count):
-    """Compute confidnce interval:
+    """Compute confidence interval:
 
     Agresti-Coull Interval at the 0.05 level
     http://en.wikipedia.org/wiki/Binomial_proportion_confidence_interval#Agresti-Coull_Interval
@@ -114,7 +113,7 @@ def cmdline_parser():
                         dest="cluster_file",
                         default="-",
                         help="Cluster output file (- for stdout = default)")
-    
+
     return parser
 
 

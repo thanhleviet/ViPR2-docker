@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 """convert 'primer pos' file to bed
 """
 
@@ -60,10 +60,10 @@ def primer_positions_to_incl_bed(primer_positions, bed_fh, primer_len,
 
     for primer_pos in primer_positions:
         if primer_pos.ori == 'F':
-            for p in range(primer_pos.pos, primer_pos.pos+primer_len):
+            for p in range(primer_pos.pos, primer_pos.pos + int(primer_pos.leng)):
                 match_dict[p] = 1
         elif primer_pos.ori == 'R':
-            for p in range(primer_pos.pos, primer_pos.pos-primer_len, -1):
+            for p in range(primer_pos.pos, primer_pos.pos - int(primer_pos.leng), -1):
                 match_dict[p] = 1
         else:
             raise ValueError

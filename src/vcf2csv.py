@@ -1,4 +1,4 @@
-#!/bin/env python2
+#!/bin/env python
 
 import sys
 import csv
@@ -7,11 +7,9 @@ import vcf
 
 
 def vcf2csv(vcffile, csvfile):
-    """FIXME:add-doc
     """
-
-    
-                                
+    FIXME:add-doc
+    """
     vcffh = vcf.VCFReader(filename=vcffile)
     fieldnames = ['Seq', 'Pos', 'Ref.Base', 'Var.Base', 'Qual', 'Allele Freq', 'Type', 'Homopolymer Length', 'Depth', 'Depth: ref fw and rev, var fw and rev']
     if csvfile == "-":

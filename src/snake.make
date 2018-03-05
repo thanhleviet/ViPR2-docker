@@ -152,7 +152,7 @@ rule map_reads_reffa:
     message:'Mapping reads against {input.reffa}'
     threads: 8
     benchmark: 'benchmark/map_to_assembly.json'
-    shell: 
+    shell:
         MAP_CMD
 
 rule map_reads_assembly:
@@ -165,7 +165,7 @@ rule map_reads_assembly:
     message:'Mapping reads against {input.reffa}'
     threads: 8
     benchmark: 'benchmark/map_to_assembly.json'
-    shell: 
+    shell:
         MAP_CMD
 
 rule coverage_plot:
@@ -180,12 +180,12 @@ rule coverage_plot:
         """
 	    # FIXME too much harcoded stuff
         # for python2.7 with matplotlib
-        export PATH=/mnt/software/unstowable/anaconda/bin/:$PATH;
+        # export PATH=/mnt/software/unstowable/anaconda/bin/:$PATH;
         # for genomeCoverageBed
-        export PATH=/mnt/software/stow/bedtools2-2.25.0/bin/:$PATH;
+        # export PATH=/mnt/software/stow/bedtools2-2.25.0/bin/:$PATH;
         # samtools
-        export PATH=$(dirname {config[SAMTOOLS]}):$PATH;
-        {config[COVERAGE_PLOT]} --force --log {output.covlog} -o {output.covplot} -b {input.bam};
+        # export PATH=$(dirname {config[SAMTOOLS]}):$PATH;
+        python2 {config[COVERAGE_PLOT]} --force --log {output.covlog} -o {output.covplot} -b {input.bam};
         """
 
 
@@ -222,12 +222,11 @@ rule bam_flagstats:
 
 
 PRIMER_POS_CMD = """
-        export PATH={config[MUMMERDIR]}:$PATH;
         # I'd love to use some other tools e.g. EMBOSS' primersearch but they are all equally unuseable
         {config[PRIMER_POS_FROM_SEQ]} -p {input.primer_fa} -r {input.reffa} --force -o {output.primerpos};
         seqname=$(cat {input.reffai} | cut -f 1)
         seqlen=$(cat {input.reffai} | cut -f 2)
-        {config[PRIMER_POS_TO_BED]} --force -i {output.primerpos} --seqname $seqname --seqlen $seqlen -p {config[PRIMER_LEN]} -o {output.primersexclbed};
+        python2 {config[PRIMER_POS_TO_BED]} --force -i {output.primerpos} --seqname $seqname --seqlen $seqlen -p {config[PRIMER_LEN]} -o {output.primersexclbed};
         """
 
 rule determine_primer_pos_assembly:
@@ -271,11 +270,11 @@ rule mark_dups:
     message:
         "Marking duplicates"
     shell:
-        "{config[MARK_PRIMER]} -i {input.bam} -o {output.bam} -p {input.primer_pos}"
+        "python2 {config[MARK_PRIMER]} -i {input.bam} -o {output.bam} -p {input.primer_pos}"
 
 
 rule indel_calling_prep:
-    """NOTE: could use lofreq viterbi instead of bamleftalign: that would fix alignment problems and do leftalignment (requires sorting), but multithreading option is missing  
+    """NOTE: could use lofreq viterbi instead of bamleftalign: that would fix alignment problems and do leftalignment (requires sorting), but multithreading option is missing
     """
     input:
         bam="{prefix}.bam",
@@ -300,7 +299,7 @@ rule call_variants:
     output:
         vcf='{prefix}.indelprep.vcf.gz'
     shell:
-        """export PATH=/mnt/software/bin/:$PATH
+        """
         {config[LOFREQ]} call-parallel --pp-threads {threads} -f {input.reffa} -l {input.nonprimer_regions} --call-indels -o {output.vcf} {input.bam}
         """
     message:
@@ -312,10 +311,9 @@ rule vcf2csv:
         "{prefix}.vcf.gz"
     output:
         "{prefix}.csv"
-    shell:  
-        """# for python2.7 with pyvcf
-        export PATH=/mnt/software/unstowable/anaconda/bin/:$PATH;
-        {config[VCF2CSV]} {input} {output}
+    shell:
+        """
+        python2 {config[VCF2CSV]} {input} {output}
         """
     message:
         "Converting vcf to csv"
@@ -326,7 +324,7 @@ rule haplo_cluster:
     output:
         "{prefix}.cluster.txt"
     shell:
-        "{config[HAPLO_CLUSTER]} -i {input} -o {output}"
+        "python2 {config[HAPLO_CLUSTER]} -i {input} -o {output}"
     message:
         "Running haplo cluster"
 
@@ -350,12 +348,14 @@ rule report:
           ViPR2 Report
           ===================
 
-          ViPR2 will assemble your (downsampled) viral amplicon sequencing reads using 
+          ViPR2 will assemble your (downsampled) viral amplicon sequencing reads using
           IVA (http://www.ncbi.nlm.nih.gov/pubmed/25725497). Contigs are oriented and gaps
           are filled with the provided reference sequence. Reads are mapped against this
-          assembly and the input reference with BWA-MEM (http://arxiv.org/abs/1303.3997). 
-          Low-frequency SNVs and Indels are then called (ignoring determined primer positions) 
+          assembly and the input reference with BWA-MEM (http://arxiv.org/abs/1303.3997).
+          Low-frequency SNVs and Indels are then called (ignoring determined primer positions)
           with LoFreq (http://www.ncbi.nlm.nih.gov/pubmed/23066108).
+
+          Dockerized by Thanh Le Viet
 
           Output files
           ------------

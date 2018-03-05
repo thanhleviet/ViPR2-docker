@@ -1,5 +1,6 @@
-#!/mnt/software/unstowable/anaconda/bin/python2
-"""The script will take a BAM file and fw/rv primer positions and
+#!/usr/bin/env python
+"""
+The script will take a BAM file and fw/rv primer positions and
 remove any forward reads starting at forwards positions and reverse
 reads ending at the reverse positions
 
@@ -16,7 +17,7 @@ import gzip
 
 #--- third-party imports
 #
-sys.path.insert(0, "/mnt/software/unstowable/anaconda/envs/pysam-0.8.4/lib/python2.7/site-packages")
+# sys.path.insert(0, "/mnt/software/unstowable/anaconda/envs/pysam-0.8.4/lib/python2.7/site-packages")
 import pysam
 assert [int(x) for x in pysam.__version__.split(".")] >= [0, 8, 0]
 
@@ -80,20 +81,21 @@ def fragment_name(r):
     >>> fragment_name("@HWUSI-EAS100R:6:73:941:1973#0/1")
     '@HWUSI-EAS100R:6:73:941:1973#0'
     """
-    
+
     if r[-2] == "/":
         return r[:-2]
     else:
         return r.split()[0]
-    
 
-        
+
+
 def find_primer_reads(bam_in, peaks_fw_start_pos, peaks_rv_end_pos, dups_fh):
-    """Find primer reads
+    """
+    Find primer reads
     """
 
     bam_fh = pysam.Samfile(bam_in, "rb")
-    for r in bam_fh:
+    for r in bam_fxh:
         if r.is_unmapped or r.is_secondary or r.is_supplementary:
             continue
 
@@ -108,12 +110,12 @@ def find_primer_reads(bam_in, peaks_fw_start_pos, peaks_rv_end_pos, dups_fh):
         if is_dup:
             dup_frag_name = fragment_name(r.query_name)
             dups_fh.write(dup_frag_name + "\n")
-                
     bam_fh.close()
 
 
 def mark_primer(sam_in, sam_out, dups_fh):
-    """FIXME:add-doc
+    """
+    FIXME:add-doc
     """
 
     dup_names = dict()
@@ -121,7 +123,7 @@ def mark_primer(sam_in, sam_out, dups_fh):
 
     for line in dups_fh:
         dup_names[line.rstrip()] = 1
-            
+
     LOG.info("Names of {} duplicated fragments read from {}".format(
         len(dup_names), dups_fh.name))
     for r in sam_in:
@@ -137,7 +139,8 @@ def mark_primer(sam_in, sam_out, dups_fh):
 
 
 def main():
-    """The main function
+    """
+    The main function
     """
 
     parser = cmdline_parser()

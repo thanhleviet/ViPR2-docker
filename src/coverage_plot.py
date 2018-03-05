@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 """Create a coverage plot from a BAM (or RazerS) file
 """
 
@@ -30,11 +30,11 @@ import numpy
 
 
 # max sequence len
-MAX_LEN = 5e6
+MAX_LEN = int(5e6)
 
 # unmapped, secondary, not passing qc, supplementary
 DEF_SAM_MASK = 0x4 | 0x100 | 0x200 | 0x400 | 0x800
-    
+
 
 __author__ = "Andreas Wilm"
 __version__ = "0.1"
@@ -376,7 +376,7 @@ def main():
     else:
         fh_log = open(opts.flog, 'w')
 
-    
+
     combined_cov = fw_cov = rv_cov = None
     if opts.frazers:
         if opts.frazers == "-":
@@ -386,11 +386,11 @@ def main():
         else:
             fhandle = open(opts.frazers, 'r')
         (fw_cov, rv_cov) = parse_coverage_razers(fhandle)
-    
+
     elif opts.fbam:
         (fw_cov, rv_cov) = parse_coverage_bam(opts.fbam)
         fhandle = None
-        
+
     elif opts.fplp:
         if opts.fplp == "-":
             fhandle = sys.stdin
@@ -532,11 +532,12 @@ def main():
     # ValueError: zero-size array to minimum.reduce without identity
     # make: *** [Sample_PHH123_s1_bwa-uniq-mapping-success.txt] Error 1
 
-    fh_log.write("Combined[%d:%d]: %d %d %f\n" % (
-        combined_range_start, combined_range_end,
-        numpy.min(combined_cov[combined_range_start:combined_range_end]),
-        numpy.max(combined_cov[combined_range_start:combined_range_end]),
-        numpy.mean(combined_cov[combined_range_start:combined_range_end])))
+    # thanhlv
+    # fh_log.write("Combined[%d:%d]: %d %d %f\n" % (
+    #     combined_range_start, combined_range_end,
+    #     numpy.min(combined_cov[combined_range_start:combined_range_end]),
+    #     numpy.max(combined_cov[combined_range_start:combined_range_end]),
+    #     numpy.mean(combined_cov[combined_range_start:combined_range_end])))
 
     if fh_log != sys.stdout:
         fh_log.close()
@@ -549,9 +550,9 @@ def main():
     ax1 = pyplot.subplot(111)
     if not opts.nolog:
         ax1.set_yscale('log')
-    if fw_cov != None:
+    if fw_cov.any() != None:
         fw_handle = ax1.plot(fw_cov, color='green', label = 'Forward')
-    if rv_cov != None:
+    if rv_cov.any() != None:
         rv_handle = ax1.plot(rv_cov, color='red', label = 'Reverse')
     combined_handle = ax1.plot(combined_cov, color='black', label = 'Combined')
     #ax1.axis([1000, 5000, 0, 5000])

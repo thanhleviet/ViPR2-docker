@@ -47,11 +47,11 @@ while [ "$1" != "" ]; do
         --force )
             force=1
             ;;
-        -h | --help ) 
+        -h | --help )
             usage
             exit 0
             ;;
-        * ) 
+        * )
             echo "FATAL: unknown argument \"$1\""
             usage
             exit 1
@@ -112,11 +112,17 @@ show-coords  -T -c -d -r $delta  > $coords || exit 1
 # convert to primer positions file
 #
 # note: not handling duplicates which shouldn't happen if primer design was not lousy
-awk -v cov_thresh=80 '/^[0-9]/ {start=$1; end=$2; qcov=$9; ori=$11; qseq=$13;
-  if (qcov>=cov_thresh) {printf "# %s\n", qseq; 
-    if (ori==1) {printf "%d F\n", start} else {printf "%d R\n", end}}}' \
-  $coords > $primer_pos || exit 1
 
+# awk -v cov_thresh=80 '/^[0-9]/ {start=$1; end=$2; qcov=$9; ori=$11; qseq=$13;
+#   if (qcov>=cov_thresh) {printf "# %s\n", qseq;
+#     if (ori==1) {printf "%d F\n", start} else {printf "%d R\n", end}}};' \
+#   $coords > $primer_pos || exit 1
+
+# thanhlv
+awk -v cov_thresh=80 '/^[0-9]/ {start=$1; end=$2; len=$5;qcov=$9; ori=$11; qseq=$13;
+  if (qcov>=cov_thresh) {printf "# %s\n", qseq;
+    if (ori==1) {printf "%d F %d\n", start, len} else {printf "%d R %d\n", end, len}}};' \
+  $coords > $primer_pos || exit 1
 
 # sanity check
 #
@@ -129,4 +135,3 @@ fi
 echoinfo "main result file: $primer_pos"
 
 exit 0
-

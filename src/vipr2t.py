@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/local/envs/py3k/bin/python3
 """Successor of the Viral Pipeline Runner (ViPR; see https://github.com/CSB5/vipr)
 
 Assembles your viral amplicons sequences, maps reads and calls low frequency variants
@@ -52,9 +52,9 @@ CONFIG_FILE = "conf.json"
 # FIXME might be better to have a template as well and add user variables only
 CONF = dict()
 # programs
-CONF['FAMAS'] = "/mnt/software/stow/famas-0.0.11/bin/famas"
-CONF['BWA'] = '/mnt/software/stow/bwa-0.7.12/bin/bwa'
-CONF['SAMTOOLS'] = '/mnt/software/stow/samtools-1.3/bin/samtools'
+CONF['FAMAS'] = "famas"
+CONF['BWA'] = 'bwa'
+CONF['SAMTOOLS'] = 'samtools'
 CONF['IVA'] = os.path.abspath(
     os.path.join(os.path.dirname(sys.argv[0]), "iva.sh"))
 CONF['PRIMER_POS_FROM_SEQ'] = os.path.abspath(
@@ -69,14 +69,14 @@ CONF['MARK_PRIMER'] = os.path.abspath(
     os.path.join(os.path.dirname(sys.argv[0]), "mark_primer.py"))
 CONF['PRIMER_POS_TO_BED'] = os.path.abspath(
     os.path.join(os.path.dirname(sys.argv[0]), "primer_pos_to_bed.py"))
-CONF['LOFREQ'] = "/mnt/software/stow/lofreq_star-2.1.2/bin/lofreq"
-CONF['BAMLEFTALIGN'] = "/mnt/software/stow/freebayes-1.0.1/bin/bamleftalign"
-CONF['SIMPLE_CONTIG_JOINER'] = "/mnt/software/stow/simple-contig-joiner-0.3/bin/simple_contig_joiner.py"
+CONF['LOFREQ'] = "lofreq"
+CONF['BAMLEFTALIGN'] = "bamleftalign"
+CONF['SIMPLE_CONTIG_JOINER'] = "simple_contig_joiner.py"
 
 CONF['PRIMER_LEN'] = 25
 CONF['VCF2CSV'] = os.path.abspath(
     os.path.join(os.path.dirname(sys.argv[0]), "vcf2csv.py"))
-CONF['MUMMERDIR'] = "/mnt/software/unstowable/mummer-3.23/"
+CONF['MUMMERDIR'] = "/user/local/bin/"
 CONF['HAPLO_CLUSTER'] = os.path.abspath(
         os.path.join(os.path.dirname(sys.argv[0]), "haplo_cluster.py"))
 
@@ -96,9 +96,9 @@ def main():
     for f in CONF.keys():
         if f in ['DEBUG', 'PRIMER_LEN']:
             continue
-        if not os.path.exists(CONF[f]):
-            logger.fatal("Missing file: %s", CONF[f])
-            sys.exit(1)
+        # if not os.path.exists(CONF[f]):
+        #     logger.fatal("Missing file: %s", CONF[f])
+        #     sys.exit(1)
     assert os.path.exists(SNAKEMAKE_TEMPLATE)
 
 
@@ -185,24 +185,14 @@ def main():
                     os.path.join(args.outdir, SNAKEMAKE_FILE))
 
     snakemake_cluster_wrapper = os.path.join(args.outdir, SNAKEMAKE_CLUSTER_WRAPPER)
-    mail_option = "-m bes -M {}@gis.a-star.edu.sg".format(getpass.getuser())
+    # mail_option = "-m bes -M {}@gis.a-star.edu.sg".format(getpass.getuser())
     with open(snakemake_cluster_wrapper, 'w') as fh:
-        fh.write('export PATH=/mnt/software/unstowable/anaconda/bin/:$PATH\n')
+        fh.write('#!/usr/bin/env bash\n')
         fh.write('# snakemake:\n')
-        # py3k env defined in /mnt/software/unstowable/anaconda and includes snakemake
         fh.write('source activate py3k;\n')
-        #fh.write('cd {};\n'.format(os.path.abspath(args.outdir)))
         fh.write('cd $(dirname $0);\n'.format(os.path.abspath(args.outdir)))
-        fh.write('# qsub for snakemake itself\n')
-        fh.write('qsub="qsub -pe OpenMP 1 -l mem_free=4G -l h_rt=48:00:00 {} -j y -V -b y -cwd";\n'.format(mail_option))
-        fh.write('# -j in cluster mode is the maximum number of spawned jobs\n')
-        fh.write('$qsub -N vipr2.{} -o {}/snakemake.qsub.log'.format(conf['SAMPLENAME'], LOG_REL_DIR))
-        qsub_per_task = "qsub -pe OpenMP {threads} -l mem_free=8G -l h_rt=24:00:00 -j y -V -b y -cwd"
-        # FIXME max runtime and mem should be defined per target in SNAKEMAKE_FILE
-        qsub_per_task += " -e {} -o {}".format(LOG_REL_DIR, LOG_REL_DIR)
-
-        fh.write(' \'snakemake -j 8 -c "{}" -s {} --configfile {} --printshellcmds\';\n'.format(
-            qsub_per_task, SNAKEMAKE_FILE, CONFIG_FILE))
+        fh.write('snakemake -j 8  -s {} --configfile {} --printshellcmds;\n'.format(
+            SNAKEMAKE_FILE, CONFIG_FILE))
 
     cmd = ['bash', snakemake_cluster_wrapper]
     if args.no_run:
